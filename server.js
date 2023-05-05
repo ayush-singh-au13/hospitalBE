@@ -5,7 +5,7 @@ const dotenv = require("dotenv");
 
 // connect middleware
 const connectDB = require("./src/config/db");
-dotenv.config({ path: "./.env" });
+// dotenv.config({ path: "./.env" });
 const PORT = 2001;
 
 connectDB();
