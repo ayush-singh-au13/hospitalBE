@@ -1,18 +1,17 @@
-const patientModel = require("../model/patitent.model");
+const clientModel = require("../model/client.model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 exports.register = async (req, res) => {
   try {
-    console.log("Registering a patient !");
-    const { firstName, lastName, email, password } = req.body;
+    console.log("Registering a client !");
+    const { companyName, email, password } = req.body;
 
     const salt = bcrypt.genSaltSync(parseInt(10));
     const hashPassword = bcrypt.hashSync(password, salt);
 
-    const createuser = await patientModel.create({
-      firstName: firstName,
-      lastName: lastName,
+    const createuser = await clientModel.create({
+      companyName: req.body.companyName,
       email: email.toLowerCase(),
       password: hashPassword,
     });
@@ -32,8 +31,7 @@ exports.login = async (req, res) => {
   try {
     const payload = {
       _id: req.user._id,
-      firstName: req.user.firstName,
-      lastName: req.user.lastName,
+      companyName: req.body.companyName,
       email: req.user.email,
       role: req.user.role,
     };
@@ -45,7 +43,7 @@ exports.login = async (req, res) => {
 
     payload["token"] = token;
     if (token) {
-      await patientModel.updateOne(
+      await clientModel.updateOne(
         { email: payload.email },
         {
           $set: {
@@ -69,31 +67,27 @@ exports.login = async (req, res) => {
 
 exports.patientlist = async () => {
   try {
-    console.log("Get the patient list !");
+    console.log("Get the client list !");
     const { role } = req.user;
-    if (role === "PATIENT") {
+    if (role === "CLIENT") {
       return res.send({
         status: 403,
         message: "You are not allowed to access this route !",
       });
     }
-    const patientList = await patientModel
+    const patientList = await clientModel
       .find({ isDeleted: false })
-      .select({ __v: 0, updatedAt: 0 })
+      .select({ companyName: 1 })
       .lean();
 
-    return res
-      .status(200)
-      .send({
-        status: 200,
-        message: "Patient List was successfully fetched",
-        data: patientList,
-      });
+    return res.status(200).send({
+      status: 200,
+      message: "Client Minified List !",
+      data: patientList,
+    });
   } catch (err) {
     return res.status(500).send({ status: 500, message: err.message });
   }
 };
 
-//@upload document 
-
-
+//@upload document

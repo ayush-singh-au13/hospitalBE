@@ -1,11 +1,11 @@
 const express = require("express");
-const ctrl = require("../controllers/patient.controller");
+const ctrl = require("../controllers/client.controller");
 const router = express.Router();
-const { checkIfUserExistsOrNot } = require("./../middlewares/index");
-const verifyUserToken = require("./../utils/token.utils");
-const upload = require("./../utils/multer");
-const cloudinary = require("./../utils/cloudinary");
-const patitentModel = require("../model/patitent.model");
+const { checkIfUserExistsOrNot } = require("../middlewares/index");
+const verifyUserToken = require("../utils/token.utils");
+const upload = require("../utils/multer");
+const cloudinary = require("../utils/cloudinary");
+const patitentModel = require("../model/client.model");
 const mongoose = require("mongoose");
 //------------------------------------------------------------
 /**

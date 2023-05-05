@@ -1,15 +1,15 @@
 const { model, Schema } = require("mongoose");
 
-const patientSchema = new Schema(
+const clientSchema = new Schema(
   {
-    firstName: String,
-    lastName: String,
+    companyName: String,
+    nameToStore:String,
     password: String,
     email: String,
     role: {
       type: String,
-      enum: ["ADMIN", "PATIENT"],
-      default: "PATIENT",
+      enum: ["ADMIN", "CLIENT"],
+      default: "CLIENT",
     },
     lastLogin: Date,
     isDeleted :{
@@ -23,8 +23,6 @@ const patientSchema = new Schema(
   },
   { timestamps: true }
 );
-patientSchema.index({
-    firstName: 1,
-});
 
-module.exports = model("Users", patientSchema);
+
+module.exports = model("clients", clientSchema);

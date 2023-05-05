@@ -1,4 +1,4 @@
-const patitentModel = require("../model/patitent.model");
+const patitentModel = require("../model/client.model");
 
 module.exports = async (req, res, next) => {
   try {
