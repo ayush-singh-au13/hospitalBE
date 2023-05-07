@@ -31,7 +31,7 @@ exports.login = async (req, res) => {
   try {
     const payload = {
       _id: req.user._id,
-      companyName: req.body.companyName,
+      companyName: req.user.companyName,
       email: req.user.email,
       role: req.user.role,
     };
