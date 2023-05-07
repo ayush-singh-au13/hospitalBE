@@ -1,4 +1,5 @@
 const patitentModel = require("../model/client.model");
+const bcrypt = require("bcryptjs");
 
 module.exports = async (req, res, next) => {
   try {
