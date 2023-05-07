@@ -11,7 +11,7 @@ exports.register = async (req, res) => {
     const hashPassword = bcrypt.hashSync(password, salt);
 
     const createuser = await clientModel.create({
-      companyName: req.body.companyName,
+      companyName: companyName,
       email: email.toLowerCase(),
       password: hashPassword,
     });

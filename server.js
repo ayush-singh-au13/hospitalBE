@@ -19,6 +19,7 @@ app.get("/", (req, res) => {
 });
 
 // route middleware
+app.use("/client",require('./src/routes/client.routes'))
 
 // api not found !handle 404
 app.use("*", function (req, res, next) {
