@@ -65,7 +65,7 @@ exports.login = async (req, res) => {
 
 // @GET patient list
 
-exports.patientlist = async () => {
+exports.patientlist = async (req, res) => {
   try {
     console.log("Get the client list !");
     const { role } = req.user;
@@ -75,7 +75,7 @@ exports.patientlist = async () => {
         message: "You are not allowed to access this route !",
       });
     }
-    const patientList = await clientModel
+    const clientList = await clientModel
       .find({ isDeleted: false })
       .select({ companyName: 1 })
       .lean();
@@ -83,11 +83,18 @@ exports.patientlist = async () => {
     return res.status(200).send({
       status: 200,
       message: "Client Minified List !",
-      data: patientList,
+      data: clientList,
     });
   } catch (err) {
     return res.status(500).send({ status: 500, message: err.message });
   }
 };
 
+exports.downloadFile = async (req, res) => {
+  try {
+
+  }catch(err) {
+    return res.status(500).send({ status: 500, message: err.message})
+  }
+};
 //@upload document
