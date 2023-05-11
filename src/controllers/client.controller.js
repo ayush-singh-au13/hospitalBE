@@ -103,7 +103,6 @@ exports.downloadFile = async (req, res) => {
 
     // Download the file and send it to the client
     request.get(fileUrl).pipe(res);
- 
   } catch (err) {
     return res.status(500).send({ status: 500, message: err.message });
   }
@@ -113,7 +112,7 @@ exports.documentList = async (req, res) => {
   try {
     // const role = req.user.role;
     let data = await clientModel
-      .find({ role: "CLIENT", cloudinary_id:{$exists:true} })
+      .find({ role: "CLIENT", cloudinary_id: { $exists: true } })
       .select({
         companyName: 1,
         email: 1,
@@ -123,17 +122,24 @@ exports.documentList = async (req, res) => {
       })
       .sort({ createdAt: -1 })
       .lean();
-      let finalData =[];
-    data.map((e) =>{
+    let finalData = [];
+    data.map((e, index) => {
       finalData.push({
+        id: index + 1,
         document: e.document,
         uploadedAt: moment(e.createdAt).format("DD-MM-YYYY"),
-        category: 'LAB TEST',
+        category: "LAB TEST",
         companyName: e.companyName,
-        cloudinary_id: e.cloudinary_id
-      })
-    })
-   return res.status(200).send({status:200, message: 'Uploaded document list', data: finalData});
+        cloudinary_id: e.cloudinary_id,
+      });
+    });
+    return res
+      .status(200)
+      .send({
+        status: 200,
+        message: "Uploaded document list",
+        data: finalData,
+      });
   } catch (err) {
     return res.status(500).send({ status: 500, message: err.message });
   }
