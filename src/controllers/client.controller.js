@@ -133,7 +133,7 @@ exports.documentList = async (req, res) => {
         cloudinary_id: e.cloudinary_id
       })
     })
-   return res.status(200).send({status:500, message: 'Uploaded document list', data: finalData});
+   return res.status(200).send({status:200, message: 'Uploaded document list', data: finalData});
   } catch (err) {
     return res.status(500).send({ status: 500, message: err.message });
   }
