@@ -20,7 +20,7 @@ router.post("/login", checkIfUserExistsOrNot, ctrl.login);
 
 // @GET patientlist
 
-router.get("/patientlist", verifyUserToken, ctrl.patientlist);
+router.get("/reportList", verifyUserToken, ctrl.reportList);
 
 //@POST upload document
 router.post("/uploadDocument", upload.single("file"), async (req, res) => {
@@ -46,6 +46,7 @@ router.post("/uploadDocument", upload.single("file"), async (req, res) => {
   }
 });
 
-router.get("/downloadFile", verifyUserToken, ctrl.downloadFile);
+router.post("/downloadFile", verifyUserToken, ctrl.downloadFile);
+router.get('/documentList', verifyUserToken, ctrl.documentList)
 
 module.exports = router;

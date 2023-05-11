@@ -20,6 +20,7 @@ const clientSchema = new Schema(
     cloudinary_id: {
       type: String,
     },
+    category:String,
   },
   { timestamps: true }
 );

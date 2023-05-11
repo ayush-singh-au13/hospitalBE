@@ -1,6 +1,8 @@
 const clientModel = require("../model/client.model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const moment = require("moment");
+const request = require("request");
 
 exports.register = async (req, res) => {
   try {
@@ -65,19 +67,23 @@ exports.login = async (req, res) => {
 
 // @GET patient list
 
-exports.patientlist = async (req, res) => {
+exports.reportList = async (req, res) => {
   try {
     console.log("Get the client list !");
     const { role } = req.user;
-    if (role === "CLIENT") {
+    if (role === "ADMIN") {
       return res.send({
         status: 403,
         message: "You are not allowed to access this route !",
       });
     }
     const clientList = await clientModel
-      .find({ isDeleted: false })
-      .select({ companyName: 1 })
+      .find({
+        companyName: req.user.companyName,
+        isDeleted: false,
+        cloudinary_id: { $exists: true },
+      })
+      .select({ companyName: 1, document: 1, cloudinary_id: 1 })
       .lean();
 
     return res.status(200).send({
@@ -92,9 +98,43 @@ exports.patientlist = async (req, res) => {
 
 exports.downloadFile = async (req, res) => {
   try {
+    console.log("Downloading file");
+    const fileUrl = req.body.url;
 
-  }catch(err) {
-    return res.status(500).send({ status: 500, message: err.message})
+    // Download the file and send it to the client
+    request.get(fileUrl).pipe(res);
+ 
+  } catch (err) {
+    return res.status(500).send({ status: 500, message: err.message });
   }
 };
-//@upload document
+//@upload document list
+exports.documentList = async (req, res) => {
+  try {
+    // const role = req.user.role;
+    let data = await clientModel
+      .find({ role: "CLIENT" })
+      .select({
+        companyName: 1,
+        email: 1,
+        document: 1,
+        cloudinary_id: 1,
+        createdAt: 1,
+      })
+      .sort({ createdAt: -1 })
+      .lean();
+      let finalData =[];
+    data.map((e) =>{
+      finalData.push({
+        document: e.document,
+        uploadedAt: moment(e.createdAt).format("DD-MM-YYYY"),
+        category: 'LAB TEST',
+        companyName: e.companyName,
+        cloudinary_id: e.cloudinary_id
+      })
+    })
+   return res.status(200).send({status:500, message: 'Uploaded document list', data: finalData});
+  } catch (err) {
+    return res.status(500).send({ status: 500, message: err.message });
+  }
+};
