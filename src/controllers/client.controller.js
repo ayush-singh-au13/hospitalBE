@@ -113,7 +113,7 @@ exports.documentList = async (req, res) => {
   try {
     // const role = req.user.role;
     let data = await clientModel
-      .find({ role: "CLIENT" })
+      .find({ role: "CLIENT", cloudinary_id:{$exists:true} })
       .select({
         companyName: 1,
         email: 1,
