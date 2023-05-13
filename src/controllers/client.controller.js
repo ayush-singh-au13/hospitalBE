@@ -77,6 +77,7 @@ exports.reportList = async (req, res) => {
         message: "You are not allowed to access this route !",
       });
     }
+    // console.log("clientname", req.user.companyName);
     const clientList = await clientModel
       .find({
         companyName: req.user.companyName,
@@ -86,10 +87,22 @@ exports.reportList = async (req, res) => {
       .select({ companyName: 1, document: 1, cloudinary_id: 1 })
       .lean();
 
+    let finalData = [];
+    clientList.map((e, index) => {
+      finalData.push({
+        // _id: e._id,
+        id: index + 1,
+        document: e.document,
+        uploadedAt: moment(e.createdAt).format("DD-MM-YYYY"),
+        category: e.category,
+        companyName: e.companyName,
+        cloudinary_id: e.cloudinary_id,
+      });
+    });
     return res.status(200).send({
       status: 200,
       message: "Client Minified List !",
-      data: clientList,
+      data: finalData,
     });
   } catch (err) {
     return res.status(500).send({ status: 500, message: err.message });
@@ -133,13 +146,11 @@ exports.documentList = async (req, res) => {
         cloudinary_id: e.cloudinary_id,
       });
     });
-    return res
-      .status(200)
-      .send({
-        status: 200,
-        message: "Uploaded document list",
-        data: finalData,
-      });
+    return res.status(200).send({
+      status: 200,
+      message: "Uploaded document list",
+      data: finalData,
+    });
   } catch (err) {
     return res.status(500).send({ status: 500, message: err.message });
   }
