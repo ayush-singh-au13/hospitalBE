@@ -21,6 +21,8 @@ router.post("/login", checkIfUserExistsOrNot, ctrl.login);
 // @GET patientlist
 
 router.get("/reportList", verifyUserToken, ctrl.reportList);
+// @GET add client
+router.post("/addclient", verifyUserToken, ctrl.addclient);
 
 //@POST upload document
 router.post("/uploadDocument", upload.single("file"), async (req, res) => {

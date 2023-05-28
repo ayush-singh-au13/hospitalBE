@@ -3,6 +3,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const moment = require("moment");
 const request = require("request");
+const sendEmailToUser = require("./../utils/sendEmail");
+const nodemailer = require("nodemailer");
 
 exports.register = async (req, res) => {
   try {
@@ -106,6 +108,107 @@ exports.reportList = async (req, res) => {
     });
   } catch (err) {
     return res.status(500).send({ status: 500, message: err.message });
+  }
+};
+
+exports.addclient = async (req, res) => {
+  try {
+    const { companyName, email, password } = req.body;
+    if (!companyName || !email || !password) {
+      return res
+        .status(200)
+        .send({ status: 200, message: "Please enter complete details" });
+    }
+    const _password = password;
+
+    const salt = bcrypt.genSaltSync(parseInt(10));
+    const hashPassword = bcrypt.hashSync(password, salt);
+
+    const newClient = await clientModel.create({
+      companyName: companyName,
+      email: email.toLowerCase(),
+      password: hashPassword,
+    });
+    let isEmailSend
+    if (newClient) {
+       isEmailSend = await this.sendEmailToUser(
+        companyName,
+        email,
+        _password
+      );
+    }
+    if(isEmailSend.accepted) {
+      return res.status(201).send({
+        status: 201,
+        message: "Client added successfully & Email Sent",
+        data: newClient,
+      });
+    }
+  
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({ status: 500, message: err.message });
+  }
+};
+
+exports.sendEmailToUser = async (companyName, email, _password) => {
+  try {
+    console.log("Sending email in progress..");
+
+    const htmlContent = `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <title>Email Template</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+      }
+      h1 {
+        color: #333;
+      }
+      p {
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Greetings from Thakur Hospital !</h1>
+    <p>Please find the credentials below : </p>
+    <p>Username: ${email}</p>
+    <p>Password: ${_password}</p>
+    <p><a href="https://thakurhospital.in">Login Here.</a></p>
+  </body>
+  </html>
+`;
+
+    // Create a Nodemailer transporter
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      auth: {
+        user: "singhvlsiayush@gmail.com",
+        pass: "tdqxiktfcdijptew",
+      },
+    });
+
+    // Define the email options
+    const mailOptions = {
+      from: "singhvlsiayush@gmail.com",
+      to: email,
+      subject: "My First Email",
+      html: htmlContent,
+    };
+
+    // Send the email using the transporter
+    const result = await transporter.sendMail(mailOptions);
+    // console.log("result: " + JSON.stringify(result))
+    return result;
+    // Return a success response
+
+  } catch (err) {
+    console.log(err);
   }
 };
 
