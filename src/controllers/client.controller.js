@@ -155,6 +155,11 @@ exports.clientList = async (req, res) => {
       .find({ role: "CLIENT", email: { $exists: true } })
       .select({ companyName: 1, email: 1, createdAt: 1 })
       .lean();
+    
+    clientData.map((e, index) => {
+      e['id'] = index + 1;
+      e['createdAt'] = moment(e['createdAt']).format("DD-MM-YYYY")
+    })
 
     return res
       .status(200)
