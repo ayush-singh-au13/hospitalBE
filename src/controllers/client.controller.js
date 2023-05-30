@@ -5,6 +5,7 @@ const moment = require("moment");
 const request = require("request");
 const sendEmailToUser = require("./../utils/sendEmail");
 const nodemailer = require("nodemailer");
+const XLSX = require("xlsx");
 
 exports.register = async (req, res) => {
   try {
@@ -151,7 +152,7 @@ exports.clientList = async (req, res) => {
   try {
     console.log("Client List !");
     let clientData = await clientModel
-      .find({ role: "CLIENT", email:{$exists:true} })
+      .find({ role: "CLIENT", email: { $exists: true } })
       .select({ companyName: 1, email: 1, createdAt: 1 })
       .lean();
 
@@ -265,6 +266,47 @@ exports.documentList = async (req, res) => {
       message: "Uploaded document list",
       data: finalData,
     });
+  } catch (err) {
+    return res.status(500).send({ status: 500, message: err.message });
+  }
+};
+
+// read excel and setting the data to JSON format
+exports.readFile = async (req, res) => {
+  try {
+    console.log("Reading the excel file");
+
+    // console.log("file===>", req.file);
+    // Read the uploaded file
+    const workbook = XLSX.readFile(req.file.path);
+
+    // Get the first sheet name
+    const sheetName = workbook.SheetNames[0];
+
+    // Get the worksheet
+    const worksheet = workbook.Sheets[sheetName];
+
+    // Convert the worksheet to JSON
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+    let key = jsonData[0];
+    let result = [];
+
+    for (let i = 1; i < jsonData.length; i++) {
+      let payload = {};
+      for (let j = 0; j < key.length; j++) {
+        payload = {
+          ...payload,
+          [`${key[j]}`]: jsonData[i][j],
+        };
+      }
+      result.push(payload);
+    }
+
+    // Send the JSON data in the response
+    return res
+      .status(200)
+      .send({ status: 200, message: "report data", data: result });
   } catch (err) {
     return res.status(500).send({ status: 500, message: err.message });
   }
