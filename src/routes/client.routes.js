@@ -1,7 +1,7 @@
 const express = require("express");
 const ctrl = require("../controllers/client.controller");
 const router = express.Router();
-const { checkIfUserExistsOrNot } = require("../middlewares/index");
+const { checkIfUserExistsOrNot,checkIfClientAlreadyExists } = require("../middlewares/index");
 const verifyUserToken = require("../utils/token.utils");
 const upload = require("./../utils/multer");
 const cloudinary = require("./../utils/cloudinary");
@@ -22,7 +22,10 @@ router.post("/login", checkIfUserExistsOrNot, ctrl.login);
 
 router.get("/reportList", verifyUserToken, ctrl.reportList);
 // @GET add client
-router.post("/addclient", verifyUserToken, ctrl.addclient);
+router.post("/addclient", verifyUserToken, checkIfClientAlreadyExists,  ctrl.addclient);
+
+//@GET client list
+router.get("/clientList", verifyUserToken, ctrl.clientList)
 
 //@POST upload document
 router.post("/uploadDocument", upload.single("file"), async (req, res) => {

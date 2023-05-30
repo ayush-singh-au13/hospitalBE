@@ -129,24 +129,36 @@ exports.addclient = async (req, res) => {
       email: email.toLowerCase(),
       password: hashPassword,
     });
-    let isEmailSend
+    let isEmailSend;
     if (newClient) {
-       isEmailSend = await this.sendEmailToUser(
-        companyName,
-        email,
-        _password
-      );
+      isEmailSend = await this.sendEmailToUser(companyName, email, _password);
     }
-    if(isEmailSend.accepted) {
+    if (isEmailSend.accepted) {
       return res.status(201).send({
         status: 201,
         message: "Client added successfully & Email Sent",
         data: newClient,
       });
     }
-  
   } catch (err) {
     console.log(err);
+    return res.status(500).send({ status: 500, message: err.message });
+  }
+};
+
+// get the client list
+exports.clientList = async (req, res) => {
+  try {
+    console.log("Client List !");
+    let clientData = await clientModel
+      .find({ role: "CLIENT", email:{$exists:true} })
+      .select({ companyName: 1, email: 1, createdAt: 1 })
+      .lean();
+
+    return res
+      .status(200)
+      .send({ status: 200, message: "Client List !", data: clientData });
+  } catch (err) {
     return res.status(500).send({ status: 500, message: err.message });
   }
 };
@@ -206,7 +218,6 @@ exports.sendEmailToUser = async (companyName, email, _password) => {
     // console.log("result: " + JSON.stringify(result))
     return result;
     // Return a success response
-
   } catch (err) {
     console.log(err);
   }
