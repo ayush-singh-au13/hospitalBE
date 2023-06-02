@@ -168,6 +168,23 @@ exports.clientList = async (req, res) => {
     return res.status(500).send({ status: 500, message: err.message });
   }
 };
+// get the client list
+exports.clientMinifiedList = async (req, res) => {
+  try {
+    console.log("Client List !");
+    let clientData = await clientModel
+      .find({ role: "CLIENT", email: { $exists: true } })
+      .select({ companyName: 1 })
+      .lean();
+    
+
+    return res
+      .status(200)
+      .send({ status: 200, message: "Client List !", data: clientData });
+  } catch (err) {
+    return res.status(500).send({ status: 500, message: err.message });
+  }
+};
 
 exports.sendEmailToUser = async (companyName, email, _password) => {
   try {

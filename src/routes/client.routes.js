@@ -27,8 +27,11 @@ router.post("/addclient", verifyUserToken, checkIfClientAlreadyExists,  ctrl.add
 //@GET client list
 router.get("/clientList", verifyUserToken, ctrl.clientList)
 
+//@GET client minified list
+router.get("/clientMinifiedList", verifyUserToken, ctrl.clientMinifiedList)
+
 // @GET
-router.get("/readFile", upload.single("file"), verifyUserToken, ctrl.readFile)
+router.post("/readFile", upload.single("file"), verifyUserToken, ctrl.readFile)
 
 //@POST upload document
 router.post("/uploadDocument", upload.single("file"), async (req, res) => {
