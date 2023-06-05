@@ -6,6 +6,37 @@ const request = require("request");
 const sendEmailToUser = require("./../utils/sendEmail");
 const nodemailer = require("nodemailer");
 const XLSX = require("xlsx");
+const puppeteer = require("puppeteer");
+const fs = require("fs");
+const path = require("path");
+const mongoose = require("mongoose");
+const cloudinary = require("cloudinary").v2;
+
+// configuring cloudinary
+cloudinary.config({
+  cloud_name: "dd7lihgvm",
+  api_key: "247815895662816",
+  api_secret: "GHtlGNP_yWtIFWgnFgJShMj1MJY",
+  secure: true,
+});
+
+// // Function to upload PDF buffer to Cloudinary
+// const uploadBufferToCloudinary = (pdfBuffer) => {
+//   // console.log("Uploading", pdfBuffer);
+//   return new Promise((resolve, reject) => {
+//     cloudinary.uploader.upload_large(
+//       pdfBuffer,
+//       { resource_type: "auto" },
+//       (error, result) => {
+//         if (error) {
+//           reject(error);
+//         } else {
+//           resolve(result);
+//         }
+//       }
+//     );
+//   });
+// };
 
 exports.register = async (req, res) => {
   try {
@@ -81,25 +112,36 @@ exports.reportList = async (req, res) => {
       });
     }
     // console.log("clientname", req.user.companyName);
-    const clientList = await clientModel
-      .find({
-        companyName: req.user.companyName,
-        isDeleted: false,
-        cloudinary_id: { $exists: true },
-      })
-      .select({ companyName: 1, document: 1, cloudinary_id: 1 })
-      .lean();
+    const clientList = await clientModel.aggregate([
+      {
+        $match: {
+          companyName: req.user.companyName,
+          isDeleted: false,
+          cloudinary_id: { $exists: true },
+        },
+      },
+      { $unwind: "$cloudinary_id" },
+      {
+        $project: {
+          companyName: 1,
+          document: "$cloudinary_id.document",
+          category: "$cloudinary_id.category",
+          updatedAt: 1,
+        },
+      },
+      { $sort: { updatedAt: -1 } },
+    ]);
 
     let finalData = [];
     clientList.map((e, index) => {
       finalData.push({
-        // _id: e._id,
         id: index + 1,
-        document: e.document,
+        _id: e._id,
         uploadedAt: moment(e.createdAt).format("DD-MM-YYYY"),
         category: e.category,
         companyName: e.companyName,
-        cloudinary_id: e.cloudinary_id,
+        document: e.document,
+        category: e.category,
       });
     });
     return res.status(200).send({
@@ -155,11 +197,11 @@ exports.clientList = async (req, res) => {
       .find({ role: "CLIENT", email: { $exists: true } })
       .select({ companyName: 1, email: 1, createdAt: 1 })
       .lean();
-    
+
     clientData.map((e, index) => {
-      e['id'] = index + 1;
-      e['createdAt'] = moment(e['createdAt']).format("DD-MM-YYYY")
-    })
+      e["id"] = index + 1;
+      e["createdAt"] = moment(e["createdAt"]).format("DD-MM-YYYY");
+    });
 
     return res
       .status(200)
@@ -176,7 +218,6 @@ exports.clientMinifiedList = async (req, res) => {
       .find({ role: "CLIENT", email: { $exists: true } })
       .select({ companyName: 1 })
       .lean();
-    
 
     return res
       .status(200)
@@ -329,6 +370,84 @@ exports.readFile = async (req, res) => {
     return res
       .status(200)
       .send({ status: 200, message: "report data", data: result });
+  } catch (err) {
+    return res.status(500).send({ status: 500, message: err.message });
+  }
+};
+
+exports.uploadFileCloudinary = async (req, res) => {
+  try {
+    console.log("Uploading file");
+
+    const element = req.body.htmlContent;
+    const companyName = req.body.companyName;
+    const category = req.body.category;
+
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
+    const page = await browser.newPage();
+    await page.setContent(element);
+
+    // Generate PDF
+    const pdfBuffer = await page.pdf();
+    await browser.close();
+
+    const filePath = path.join(__dirname, "temp.pdf");
+    fs.writeFileSync(filePath, pdfBuffer);
+
+    // Upload the temporary file to Cloudinary
+    cloudinary.uploader
+      .upload(filePath, {
+        /* upload options */
+        folder: "hospital",
+      })
+      .then(async (result) => {
+        console.log("Cloudinary upload response:", result.secure_url);
+        let cloudinary_id = [
+          {
+            document: result.secure_url,
+            category: category,
+          },
+        ];
+
+        let update = await clientModel.updateOne(
+          { _id: new mongoose.Types.ObjectId(companyName) },
+
+          { $push: { cloudinary_id: { $each: cloudinary_id } } }
+        );
+
+        // Handle the upload success
+        // Delete the temporary file if needed
+        fs.unlinkSync(filePath);
+      })
+      .catch((error) => {
+        console.error("Cloudinary upload error:", error);
+        // Handle the upload error
+        // Delete the temporary file if needed
+        fs.unlinkSync(filePath);
+      });
+
+    res.send("File uploaded successfully");
+    // Upload the PDF buffer to Cloudinary
+  } catch (err) {
+    return res.status(500).send({ status: 500, message: err.message });
+  }
+};
+
+exports.download = async (req, res) => {
+  try {
+    const filePath = req.query.fileUrl; // Assuming the URL is passed as a query parameter
+
+    // Set the appropriate headers for the download response
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=downloaded_file.pdf"
+    );
+
+    // Send the file as the response
+    res.send({status:200, message:"file downloaded successfully"});
   } catch (err) {
     return res.status(500).send({ status: 500, message: err.message });
   }

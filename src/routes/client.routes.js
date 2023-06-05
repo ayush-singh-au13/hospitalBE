@@ -32,6 +32,8 @@ router.get("/clientMinifiedList", verifyUserToken, ctrl.clientMinifiedList)
 
 // @GET
 router.post("/readFile", upload.single("file"), verifyUserToken, ctrl.readFile)
+router.post("/uploadFileCloudinary",  ctrl.uploadFileCloudinary);
+router.get("/download", ctrl.download)
 
 //@POST upload document
 router.post("/uploadDocument", upload.single("file"), async (req, res) => {

@@ -3,7 +3,8 @@ const { model, Schema } = require("mongoose");
 const clientSchema = new Schema(
   {
     companyName: String,
-    nameToStore:String,
+    clientName: String,
+    nameToStore: String,
     password: String,
     email: String,
     role: {
@@ -12,18 +13,19 @@ const clientSchema = new Schema(
       default: "CLIENT",
     },
     lastLogin: Date,
-    isDeleted :{
+    isDeleted: {
       type: Boolean,
-      default: false
+      default: false,
     },
-    document:String,
-    cloudinary_id: {
-      type: String,
-    },
-    category:String,
+   
+    cloudinary_id: [
+      {
+        document: String,
+        category: String,
+      },
+    ],
   },
   { timestamps: true }
 );
-
 
 module.exports = model("clients", clientSchema);
