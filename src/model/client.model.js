@@ -3,7 +3,6 @@ const { model, Schema } = require("mongoose");
 const clientSchema = new Schema(
   {
     companyName: String,
-    clientName: String,
     nameToStore: String,
     password: String,
     email: String,
@@ -22,6 +21,8 @@ const clientSchema = new Schema(
       {
         document: String,
         category: String,
+        clientName: String,
+        uploadedAt: Date,
       },
     ],
   },

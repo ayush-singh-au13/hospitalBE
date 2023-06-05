@@ -126,7 +126,8 @@ exports.reportList = async (req, res) => {
           companyName: 1,
           document: "$cloudinary_id.document",
           category: "$cloudinary_id.category",
-          updatedAt: 1,
+          clientName: "$cloudinary_id.clientName",
+          uploadedAt: "$cloudinary_id.uploadedAt",
         },
       },
       { $sort: { updatedAt: -1 } },
@@ -137,11 +138,12 @@ exports.reportList = async (req, res) => {
       finalData.push({
         id: index + 1,
         _id: e._id,
-        uploadedAt: moment(e.createdAt).format("DD-MM-YYYY"),
+        uploadedAt: moment(e.uploadedAt).format("DD-MM-YYYY"),
         category: e.category,
         companyName: e.companyName,
         document: e.document,
         category: e.category,
+        clientName: e.clientName,
       });
     });
     return res.status(200).send({
@@ -273,7 +275,7 @@ exports.sendEmailToUser = async (companyName, email, _password) => {
     const mailOptions = {
       from: "singhvlsiayush@gmail.com",
       to: email,
-      subject: "My First Email",
+      subject: "Login Credential's- Thakur Hospital",
       html: htmlContent,
     };
 
@@ -382,6 +384,10 @@ exports.uploadFileCloudinary = async (req, res) => {
     const element = req.body.htmlContent;
     const companyName = req.body.companyName;
     const category = req.body.category;
+    const clientName = req.body.name;
+
+    // console.log("clientName: " + clientName);
+    // return;
 
     const browser = await puppeteer.launch({
       headless: true,
@@ -404,17 +410,18 @@ exports.uploadFileCloudinary = async (req, res) => {
         folder: "hospital",
       })
       .then(async (result) => {
-        console.log("Cloudinary upload response:", result.secure_url);
+        // console.log("Cloudinary upload response:", result.secure_url);
         let cloudinary_id = [
           {
             document: result.secure_url,
             category: category,
+            clientName: clientName,
+            uploadedAt: Date.now(),
           },
         ];
 
         let update = await clientModel.updateOne(
           { _id: new mongoose.Types.ObjectId(companyName) },
-
           { $push: { cloudinary_id: { $each: cloudinary_id } } }
         );
 
@@ -431,23 +438,6 @@ exports.uploadFileCloudinary = async (req, res) => {
 
     res.send("File uploaded successfully");
     // Upload the PDF buffer to Cloudinary
-  } catch (err) {
-    return res.status(500).send({ status: 500, message: err.message });
-  }
-};
-
-exports.download = async (req, res) => {
-  try {
-    const filePath = req.query.fileUrl; // Assuming the URL is passed as a query parameter
-
-    // Set the appropriate headers for the download response
-    res.setHeader(
-      "Content-Disposition",
-      "attachment; filename=downloaded_file.pdf"
-    );
-
-    // Send the file as the response
-    res.send({status:200, message:"file downloaded successfully"});
   } catch (err) {
     return res.status(500).send({ status: 500, message: err.message });
   }
