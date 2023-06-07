@@ -6,7 +6,7 @@ const request = require("request");
 const sendEmailToUser = require("./../utils/sendEmail");
 const nodemailer = require("nodemailer");
 const XLSX = require("xlsx");
-const puppeteer = require("puppeteer");
+const puppeteer = require('puppeteer-core');
 const fs = require("fs");
 const path = require("path");
 const mongoose = require("mongoose");
@@ -390,8 +390,8 @@ exports.uploadFileCloudinary = async (req, res) => {
     // return;
 
     const browser = await puppeteer.launch({
-      headless: false,
-       executablePath: '/path/to/Chrome'
+      // headless: false,
+      //  executablePath: '/path/to/Chrome'
       // args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
     const page = await browser.newPage();
