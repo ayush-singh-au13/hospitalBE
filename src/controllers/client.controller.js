@@ -6,7 +6,7 @@ const request = require("request");
 const sendEmailToUser = require("./../utils/sendEmail");
 const nodemailer = require("nodemailer");
 const XLSX = require("xlsx");
-const puppeteer = require('puppeteer-core');
+const puppeteer = require("puppeteer");
 const fs = require("fs");
 const path = require("path");
 const mongoose = require("mongoose");
@@ -389,17 +389,12 @@ exports.uploadFileCloudinary = async (req, res) => {
     // console.log("clientName: " + clientName);
     // return;
 
-    const browser = await puppeteer.launch({
-  
-      executablePath: await puppeteer.executablePath()
-
-    });
+    const browser = await puppeteer.launch({ headless: "new" });
     const page = await browser.newPage();
     await page.setContent(element);
 
     // Generate PDF
-    const pdfBuffer = await page.pdf();
-    await browser.close();
+    const pdfBuffer = await page.pdf({ format: "A4" });
 
     const filePath = path.join(__dirname, "temp.pdf");
     fs.writeFileSync(filePath, pdfBuffer);
@@ -436,8 +431,9 @@ exports.uploadFileCloudinary = async (req, res) => {
         // Delete the temporary file if needed
         fs.unlinkSync(filePath);
       });
+    await browser.close();
+    return res.send("File uploaded successfully");
 
-    res.send("File uploaded successfully");
     // Upload the PDF buffer to Cloudinary
   } catch (err) {
     return res.status(500).send({ status: 500, message: err.message });
