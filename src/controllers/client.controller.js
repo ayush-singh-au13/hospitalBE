@@ -390,8 +390,8 @@ exports.uploadFileCloudinary = async (req, res) => {
     // return;
 
     const browser = await puppeteer.launch({
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      headless: false,
+      // args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
     const page = await browser.newPage();
     await page.setContent(element);
