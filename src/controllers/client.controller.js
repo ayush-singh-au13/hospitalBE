@@ -130,7 +130,7 @@ exports.reportList = async (req, res) => {
           uploadedAt: "$cloudinary_id.uploadedAt",
         },
       },
-      { $sort: { updatedAt: -1 } },
+      { $sort: { uploadedAt: -1 } },
     ]);
 
     let finalData = [];
