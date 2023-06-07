@@ -390,9 +390,9 @@ exports.uploadFileCloudinary = async (req, res) => {
     // return;
 
     const browser = await puppeteer.launch({
-      // headless: false,
-       executablePath: '/path/to/Chrome'
-      // args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  
+      executablePath: await puppeteer.executablePath()
+
     });
     const page = await browser.newPage();
     await page.setContent(element);
