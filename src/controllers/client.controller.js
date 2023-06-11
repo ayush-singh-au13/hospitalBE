@@ -266,14 +266,14 @@ exports.sendEmailToUser = async (companyName, email, _password) => {
     const transporter = nodemailer.createTransport({
       service: "Gmail",
       auth: {
-        user: "singhvlsiayush@gmail.com",
-        pass: "tdqxiktfcdijptew",
+        user: "thakurhospital0657@gmail.com",
+        pass: "yqhixurjojncmyqb",
       },
     });
 
     // Define the email options
     const mailOptions = {
-      from: "singhvlsiayush@gmail.com",
+      from: "thakurhospital0657@gmail.com",
       to: email,
       subject: "Login Credential's- Thakur Hospital",
       html: htmlContent,
