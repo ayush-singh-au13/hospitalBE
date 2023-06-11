@@ -2,7 +2,7 @@ const clientModel = require("../model/client.model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const moment = require("moment");
-const request = require("request");
+// const request = require("request");
 const sendEmailToUser = require("./../utils/sendEmail");
 const nodemailer = require("nodemailer");
 const XLSX = require("xlsx");
@@ -289,17 +289,17 @@ exports.sendEmailToUser = async (companyName, email, _password) => {
   }
 };
 
-exports.downloadFile = async (req, res) => {
-  try {
-    console.log("Downloading file");
-    const fileUrl = req.body.url;
+// exports.downloadFile = async (req, res) => {
+//   try {
+//     console.log("Downloading file");
+//     const fileUrl = req.body.url;
 
-    // Download the file and send it to the client
-    request.get(fileUrl).pipe(res);
-  } catch (err) {
-    return res.status(500).send({ status: 500, message: err.message });
-  }
-};
+//     // Download the file and send it to the client
+//     request.get(fileUrl).pipe(res);
+//   } catch (err) {
+//     return res.status(500).send({ status: 500, message: err.message });
+//   }
+// };
 //@upload document list
 exports.documentList = async (req, res) => {
   try {

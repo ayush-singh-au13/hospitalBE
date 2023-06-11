@@ -59,7 +59,7 @@ router.post("/uploadDocument", upload.single("file"), async (req, res) => {
   }
 });
 
-router.post("/downloadFile", verifyUserToken, ctrl.downloadFile);
+// router.post("/downloadFile", verifyUserToken, ctrl.downloadFile);
 router.get('/documentList', verifyUserToken, ctrl.documentList)
 
 module.exports = router;
