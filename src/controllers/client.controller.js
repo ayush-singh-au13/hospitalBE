@@ -437,8 +437,8 @@ exports.uploadFileCloudinary = async (req, res) => {
     const empCode = req.body.empCode;
 
     const browser = await puppeteer.launch({
-      executablePath: await puppeteer.executablePath(),
-      headless: new
+      executablePath: await puppeteer.executablePath()
+      // headless: new
     });
     const page = await browser.newPage();
     await page.setContent(element);
