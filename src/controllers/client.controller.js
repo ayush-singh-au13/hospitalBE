@@ -415,7 +415,7 @@ exports.readFile = async (req, res) => {
       }
       result.push(payload);
     }
-    console.log(result);
+    // console.log(result);
     // Send the JSON data in the response
     return res
       .status(200)
@@ -482,7 +482,7 @@ exports.uploadFileCloudinary = async (req, res) => {
         console.error("Cloudinary upload error:", error);
         // Handle the upload error
         // Delete the temporary file if needed
-        fs.unlinkSync(filePath);
+        // fs.unlinkSync(filePath);
       });
     await browser.close();
     // fs.unlinkSync(filePath);
