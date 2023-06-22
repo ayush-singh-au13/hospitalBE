@@ -23,6 +23,7 @@ const clientSchema = new Schema(
         category: String,
         clientName: String,
         uploadedAt: Date,
+        empCode: String
       },
     ],
   },

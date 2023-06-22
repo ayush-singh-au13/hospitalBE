@@ -128,6 +128,7 @@ exports.reportList = async (req, res) => {
           category: "$cloudinary_id.category",
           clientName: "$cloudinary_id.clientName",
           uploadedAt: "$cloudinary_id.uploadedAt",
+          empCode: "$cloudinary_id.empCode",
         },
       },
       { $sort: { uploadedAt: -1 } },
@@ -144,6 +145,7 @@ exports.reportList = async (req, res) => {
         document: e.document,
         category: e.category,
         clientName: e.clientName,
+        empCode: e.empCode ? e.empCode : "",
       });
     });
     return res.status(200).send({
@@ -170,7 +172,7 @@ exports.addclient = async (req, res) => {
     const hashPassword = bcrypt.hashSync(password, salt);
 
     const newClient = await clientModel.create({
-      companyName: companyName,
+      companyName: companyName.toLowerCase(),
       email: email.toLowerCase(),
       password: hashPassword,
     });
@@ -195,6 +197,7 @@ exports.addclient = async (req, res) => {
 exports.clientList = async (req, res) => {
   try {
     console.log("Client List !");
+
     let clientData = await clientModel
       .find({ role: "CLIENT", email: { $exists: true } })
       .select({ companyName: 1, email: 1, createdAt: 1 })
@@ -341,6 +344,42 @@ exports.readFile = async (req, res) => {
   try {
     console.log("Reading the excel file");
 
+    let headers = [
+      "SR NO",
+      "DATE",
+      "ECODE",
+      "DEPTT",
+      "DESI.",
+      "GLASS",
+      "NAME",
+      "FATHER NAME",
+      "SEX",
+      "AGE",
+      "BG",
+      "RH FACTOR",
+      "H",
+      "W",
+      "RES",
+      "INS",
+      "EXP",
+      "HB",
+      "TLC",
+      "N",
+      "L",
+      "M",
+      "E",
+      "B",
+      "ESR",
+      "B SUGAR",
+      "PULSE",
+      "BP",
+      "TEMP",
+      "URINE COLOR",
+      "PUS CELLS",
+      "RBC",
+      "SUGAR",
+    ];
+
     // console.log("file===>", req.file);
     // Read the uploaded file
     const workbook = XLSX.readFile(req.file.path);
@@ -355,10 +394,19 @@ exports.readFile = async (req, res) => {
     const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
     let key = jsonData[0];
-    let result = [];
 
+    for (let i = 0; i < key.length; i++) {
+      let spell = headers.indexOf(key[i]);
+      if (!headers.includes(key[i])) {
+        return res.send({
+          message: `Please correct the spelling of ${key[i]}`,
+        });
+      }
+    }
+    let result = [];
+    // console.log(jsonData)
+    let payload = {};
     for (let i = 1; i < jsonData.length; i++) {
-      let payload = {};
       for (let j = 0; j < key.length; j++) {
         payload = {
           ...payload,
@@ -367,7 +415,7 @@ exports.readFile = async (req, res) => {
       }
       result.push(payload);
     }
-
+    console.log(result);
     // Send the JSON data in the response
     return res
       .status(200)
@@ -381,15 +429,16 @@ exports.uploadFileCloudinary = async (req, res) => {
   try {
     console.log("Uploading file");
 
+ 
     const element = req.body.htmlContent;
     const companyName = req.body.companyName;
     const category = req.body.category;
     const clientName = req.body.name;
+    const empCode = req.body.empCode;
 
-    // console.log("clientName: " + clientName);
-    // return;
-
-    const browser = await puppeteer.launch({executablePath: await puppeteer.executablePath()});
+    const browser = await puppeteer.launch({
+      executablePath: await puppeteer.executablePath(),
+    });
     const page = await browser.newPage();
     await page.setContent(element);
 
@@ -413,6 +462,7 @@ exports.uploadFileCloudinary = async (req, res) => {
             category: category,
             clientName: clientName,
             uploadedAt: Date.now(),
+            empCode: empCode,
           },
         ];
 
@@ -422,8 +472,10 @@ exports.uploadFileCloudinary = async (req, res) => {
         );
 
         // Handle the upload success
-        // Delete the temporary file if needed
-        fs.unlinkSync(filePath);
+     
+
+          
+        
       })
       .catch((error) => {
         console.error("Cloudinary upload error:", error);
@@ -432,6 +484,7 @@ exports.uploadFileCloudinary = async (req, res) => {
         fs.unlinkSync(filePath);
       });
     await browser.close();
+    // fs.unlinkSync(filePath);
     return res.send("File uploaded successfully");
 
     // Upload the PDF buffer to Cloudinary
