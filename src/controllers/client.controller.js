@@ -438,7 +438,6 @@ exports.uploadFileCloudinary = async (req, res) => {
 
     const browser = await puppeteer.launch({
       executablePath: await puppeteer.executablePath()
-      // headless: new
     });
     const page = await browser.newPage();
     await page.setContent(element);
