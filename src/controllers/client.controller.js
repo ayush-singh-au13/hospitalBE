@@ -429,7 +429,6 @@ exports.uploadFileCloudinary = async (req, res) => {
   try {
     console.log("Uploading file");
 
- 
     const element = req.body.htmlContent;
     const companyName = req.body.companyName;
     const category = req.body.category;
@@ -437,8 +436,7 @@ exports.uploadFileCloudinary = async (req, res) => {
     const empCode = req.body.empCode;
 
     const browser = await puppeteer.launch({
-      executablePath: await puppeteer.executablePath(),
-      headless: new
+      headless: "new",
     });
     const page = await browser.newPage();
     await page.setContent(element);
@@ -473,10 +471,6 @@ exports.uploadFileCloudinary = async (req, res) => {
         );
 
         // Handle the upload success
-     
-
-          
-        
       })
       .catch((error) => {
         console.error("Cloudinary upload error:", error);
