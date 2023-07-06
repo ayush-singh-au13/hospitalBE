@@ -356,6 +356,7 @@ exports.readFile = async (req, res) => {
       "SEX",
       "AGE",
       "BG",
+      "B GROUP",
       "RH FACTOR",
       "H",
       "W",
@@ -380,6 +381,8 @@ exports.readFile = async (req, res) => {
       "SUGAR",
     ];
 
+    const options = { day: "2-digit", month: "2-digit", year: "numeric" };
+    const EXCEL_DATE_OFFSET = 25569;
     // console.log("file===>", req.file);
     // Read the uploaded file
     const workbook = XLSX.readFile(req.file.path);
@@ -399,6 +402,7 @@ exports.readFile = async (req, res) => {
       let spell = headers.indexOf(key[i]);
       if (!headers.includes(key[i])) {
         return res.send({
+          status: 400,
           message: `Please correct the spelling of ${key[i]}`,
         });
       }
@@ -408,9 +412,24 @@ exports.readFile = async (req, res) => {
     let payload = {};
     for (let i = 1; i < jsonData.length; i++) {
       for (let j = 0; j < key.length; j++) {
+        let value = jsonData[i][j];
+
+        if (key[j] === "DATE") {
+          if (
+            typeof value === "number" &&
+            value % 1 === 0 &&
+            value >= 0 &&
+            value <= 2958465
+          ) {
+            // Convert Excel date to JavaScript date
+            value = new Date((value - EXCEL_DATE_OFFSET) * 24 * 60 * 60 * 1000);
+            value = value.toLocaleDateString("en-GB", options);
+          }
+        }
+        // Check if the value is a date (based on your specific formatting rules)
         payload = {
           ...payload,
-          [`${key[j]}`]: jsonData[i][j],
+          [`${key[j]}`]: value,
         };
       }
       result.push(payload);
